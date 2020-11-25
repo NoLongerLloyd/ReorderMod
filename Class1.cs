@@ -5,25 +5,46 @@ using RoR2;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
-
-
-
-//using On.RoR2;
+using On.RoR2;
+using BepInEx.Configuration;
 
 
 namespace NoLongerLloyd
 {
     [BepInDependency("com.bepis.r2api")]
     //Change these
-    [BepInPlugin("com.NoLongerLloyd.Reorderer", "Reorders your inventory when you level up", "1.0.2")]
+    [BepInPlugin("com.NoLongerLloyd.Reorderer", "Reorders your inventory when you level up", "1.2.0")]
 
 
     public class Reorderer : BaseUnityPlugin
     {
 
+		private static ConfigEntry<int> tier1Min { get; set; }
+		private static ConfigEntry<int> tier1Max { get; set; }
+
+		private static ConfigEntry<int> tier2Min { get; set; }
+		private static ConfigEntry<int> tier2Max { get; set; }
+
+		private static ConfigEntry<int> tier3Min { get; set; }
+		private static ConfigEntry<int> tier3Max { get; set; }
+
+		private static ConfigEntry<int> tierLunarMin { get; set; }
+		private static ConfigEntry<int> tierLunarMax { get; set; }
 
 		public void Awake()
 		{
+			tier1Min = Config.Bind<int>("settings","MinTier1Items",1,"Minnimum number of tier 1 items that could be created on randomize");
+			tier1Max = Config.Bind<int>("settings", "MaxTier1Items", 5, "Maximum number of tier 1 items that could be created on randomize");
+
+			tier2Min = Config.Bind<int>("settings", "MinTier2Items", 1, "Minnimum number of tier 2 items that could be created on randomize");
+			tier2Max = Config.Bind<int>("settings", "MaxTier2Items", 3, "Maximum number of tier 2 items that could be created on randomize");
+
+			tier3Min = Config.Bind<int>("settings", "MinTier3Items", 1, "Minnimum number of tier 3 items that could be created on randomize");
+			tier3Max = Config.Bind<int>("settings", "MaxTier3Items", 3, "Maximum number of tier 3 items that could be created on randomize");
+
+			tierLunarMin = Config.Bind<int>("settings", "MinTierLunarItems", 1, "Minnimum number of lunar items that could be created on randomize");
+			tierLunarMax = Config.Bind<int>("settings", "MaxTierLunarItems", 3, "Maximum number of lunar items that could be created on randomize");
+
 			currentLevel = 0;
 			On.RoR2.GlobalEventManager.CreateLevelUpEffect += new On.RoR2.GlobalEventManager.hook_CreateLevelUpEffect(this.GlobalEventManager_CreateLevelUpEffect);
 		}
@@ -42,7 +63,7 @@ namespace NoLongerLloyd
 					System.Random rnd = new System.Random();
 
 					RoR2.CharacterMaster localUser = playerCharacterMasterController.master;
-					CharacterBody playerBody = localUser.GetBody();
+					RoR2.CharacterBody playerBody = localUser.GetBody();
 					int playerLevel = (int)playerBody.level;
 
 					if (currentLevel < playerLevel) { 
@@ -50,22 +71,22 @@ namespace NoLongerLloyd
 						ItemTier itemTier1 = ItemTier.Tier1;
 						int amountOfItemsInTier = this.getAmountOfItemsInTier(itemTier1, playerCharacterMasterController.master);
 						this.removeAllItemsInTier(itemTier1, playerCharacterMasterController.master);
-						this.addItems(itemTier1, amountOfItemsInTier, playerCharacterMasterController.master, rnd);
+						this.addItems(itemTier1, amountOfItemsInTier, playerCharacterMasterController.master, rnd, tier1Min.Value, tier1Max.Value);
 
 						ItemTier itemTier2 = ItemTier.Tier2;
 						amountOfItemsInTier = this.getAmountOfItemsInTier(itemTier2, playerCharacterMasterController.master);
 						this.removeAllItemsInTier(itemTier2, playerCharacterMasterController.master);
-						this.addItems(itemTier2, amountOfItemsInTier, playerCharacterMasterController.master, rnd);
+						this.addItems(itemTier2, amountOfItemsInTier, playerCharacterMasterController.master, rnd, tier2Min.Value, tier2Max.Value);
 
 						ItemTier itemTier3 = ItemTier.Tier3;
 						amountOfItemsInTier = this.getAmountOfItemsInTier(itemTier3, playerCharacterMasterController.master);
 						this.removeAllItemsInTier(itemTier3, playerCharacterMasterController.master);
-						this.addItems(itemTier3, amountOfItemsInTier, playerCharacterMasterController.master, rnd);
+						this.addItems(itemTier3, amountOfItemsInTier, playerCharacterMasterController.master, rnd,tier3Min.Value,tier3Max.Value);
 
 						ItemTier itemTierLunar = ItemTier.Lunar;
 						amountOfItemsInTier = this.getAmountOfItemsInTier(itemTierLunar, playerCharacterMasterController.master);
 						this.removeAllItemsInTier(itemTierLunar, playerCharacterMasterController.master);
-						this.addItems(itemTierLunar, amountOfItemsInTier, playerCharacterMasterController.master, rnd);
+						this.addItems(itemTierLunar, amountOfItemsInTier, playerCharacterMasterController.master, rnd,tierLunarMin.Value,tierLunarMax.Value);
 						currentLevel = playerLevel;
 					}
 				}		
@@ -81,9 +102,23 @@ namespace NoLongerLloyd
 		}
 
 
-		private void addItems(ItemTier item, int amount, RoR2.CharacterMaster localUser, System.Random rnd)
+		private void addItems(ItemTier item, int amount, RoR2.CharacterMaster localUser, System.Random rnd, int min, int max)
 		{
-			int amountOfItems = rnd.Next(1, 4);
+			int amountOfItems;
+			if(min > max)
+            {
+				max = min;
+            }
+
+			if (min <= 0)
+            {
+				amountOfItems = rnd.Next(1, max+1);
+			}
+            else
+            {
+				amountOfItems = rnd.Next(min, max+1);
+			}
+
 			int itemsToGive = amount / amountOfItems;
 			int remainder = amount % amountOfItems;
 			ItemIndex itemRolled;
