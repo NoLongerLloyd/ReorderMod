@@ -15,7 +15,7 @@ namespace NoLongerLloyd
 {
     [BepInDependency("com.bepis.r2api")]
     //Change these
-    [BepInPlugin("com.NoLongerLloyd.Reorderer", "Reorders your inventory when you level up", "1.0.0")]
+    [BepInPlugin("com.NoLongerLloyd.Reorderer", "Reorders your inventory when you level up", "1.0.2")]
 
 
     public class Reorderer : BaseUnityPlugin
@@ -44,8 +44,6 @@ namespace NoLongerLloyd
 					RoR2.CharacterMaster localUser = playerCharacterMasterController.master;
 					CharacterBody playerBody = localUser.GetBody();
 					int playerLevel = (int)playerBody.level;
-
-					RoR2.Chat.AddMessage("Playerlevel: " + playerLevel + " StoredLevel: " + currentLevel);
 
 					if (currentLevel < playerLevel) { 
 						
