@@ -24,6 +24,7 @@ namespace NoLongerLloyd
 
 		public void Awake()
 		{
+			currentLevel = 0;
 			On.RoR2.GlobalEventManager.CreateLevelUpEffect += new On.RoR2.GlobalEventManager.hook_CreateLevelUpEffect(this.GlobalEventManager_CreateLevelUpEffect);
 		}
 
@@ -39,28 +40,36 @@ namespace NoLongerLloyd
 				{
 					string displayName = playerCharacterMasterController.GetDisplayName();
 					System.Random rnd = new System.Random();
-					//CharacterMaster localUser = playerCharacterMasterController.master;
 
+					RoR2.CharacterMaster localUser = playerCharacterMasterController.master;
+					CharacterBody playerBody = localUser.GetBody();
+					int playerLevel = (int)playerBody.level;
 
-					ItemTier itemTier1 = ItemTier.Tier1;
-					int amountOfItemsInTier = this.getAmountOfItemsInTier(itemTier1, playerCharacterMasterController.master);
-					this.removeAllItemsInTier(itemTier1, playerCharacterMasterController.master);
-					this.addItems(itemTier1, amountOfItemsInTier, playerCharacterMasterController.master,rnd);
+					RoR2.Chat.AddMessage("Playerlevel: " + playerLevel + " StoredLevel: " + currentLevel);
 
-					ItemTier itemTier2 = ItemTier.Tier2;
-					amountOfItemsInTier = this.getAmountOfItemsInTier(itemTier2, playerCharacterMasterController.master);
-					this.removeAllItemsInTier(itemTier2, playerCharacterMasterController.master);
-					this.addItems(itemTier2, amountOfItemsInTier, playerCharacterMasterController.master,rnd);
+					if (currentLevel < playerLevel) { 
+						
+						ItemTier itemTier1 = ItemTier.Tier1;
+						int amountOfItemsInTier = this.getAmountOfItemsInTier(itemTier1, playerCharacterMasterController.master);
+						this.removeAllItemsInTier(itemTier1, playerCharacterMasterController.master);
+						this.addItems(itemTier1, amountOfItemsInTier, playerCharacterMasterController.master, rnd);
 
-					ItemTier itemTier3 = ItemTier.Tier3;
-					amountOfItemsInTier = this.getAmountOfItemsInTier(itemTier3, playerCharacterMasterController.master);
-					this.removeAllItemsInTier(itemTier3, playerCharacterMasterController.master);
-					this.addItems(itemTier3, amountOfItemsInTier, playerCharacterMasterController.master,rnd);
+						ItemTier itemTier2 = ItemTier.Tier2;
+						amountOfItemsInTier = this.getAmountOfItemsInTier(itemTier2, playerCharacterMasterController.master);
+						this.removeAllItemsInTier(itemTier2, playerCharacterMasterController.master);
+						this.addItems(itemTier2, amountOfItemsInTier, playerCharacterMasterController.master, rnd);
 
-					ItemTier itemTierLunar = ItemTier.Lunar;
-					amountOfItemsInTier = this.getAmountOfItemsInTier(itemTierLunar, playerCharacterMasterController.master);
-					this.removeAllItemsInTier(itemTierLunar, playerCharacterMasterController.master);
-					this.addItems(itemTierLunar, amountOfItemsInTier, playerCharacterMasterController.master, rnd);
+						ItemTier itemTier3 = ItemTier.Tier3;
+						amountOfItemsInTier = this.getAmountOfItemsInTier(itemTier3, playerCharacterMasterController.master);
+						this.removeAllItemsInTier(itemTier3, playerCharacterMasterController.master);
+						this.addItems(itemTier3, amountOfItemsInTier, playerCharacterMasterController.master, rnd);
+
+						ItemTier itemTierLunar = ItemTier.Lunar;
+						amountOfItemsInTier = this.getAmountOfItemsInTier(itemTierLunar, playerCharacterMasterController.master);
+						this.removeAllItemsInTier(itemTierLunar, playerCharacterMasterController.master);
+						this.addItems(itemTierLunar, amountOfItemsInTier, playerCharacterMasterController.master, rnd);
+						currentLevel = playerLevel;
+					}
 				}		
 				
 			}
